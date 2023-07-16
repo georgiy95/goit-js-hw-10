@@ -16,7 +16,6 @@ body {
 }
 .cat-info {
   display: inline-flex;
-  /* height: 350px; */
 }
 .breed-select {
   max-width: 400px;

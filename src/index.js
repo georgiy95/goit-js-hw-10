@@ -45,8 +45,7 @@ fetchBreeds()
   }
   
   function createMarkupCat(cat) {
-    const catMarkup = `<img class='cat-img' src='${cat.url}' alt='${cat.breeds[0].name}' width: 200px;
-    height: 200px;/>
+    const catMarkup = `<img class='cat-img' src='${cat.url}' alt='${cat.breeds[0].name}' width='400' height='400'/>
     <div class='text-box'>
     <h2 class='title-cat'>${cat.breeds[0].name}</h2>
     <p class='text-cat'>${cat.breeds[0].description}</p>
