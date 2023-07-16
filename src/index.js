@@ -1,70 +1,70 @@
-import { fetchBreeds, fetchCatByBreed } from "./cat-search";
-import './styles.css';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import SlimSelect from 'slim-select'
-import 'slim-select/dist/slimselect.css';
+import { fetchBreeds, fetchCatByBreed } from './cat-search';
+import SlimSelect from 'slim-select';
+import Notiflix from 'notiflix';
 
-const ref = {
-    selector: document.querySelector('.breed-select'),
-    divCatInfo: document.querySelector('.cat-info'),
-    loader: document.querySelector('.loader'),
-    error: document.querySelector('.error'),
+const refs = {
+  breedSelect: document.querySelector('select.breed-select'),
+  loader: document.querySelector('p.loader'),
+  error: document.querySelector('p.error'),
+  catInfo: document.querySelector('div.cat-info'),
 };
-const { selector, divCatInfo, loader, error } = ref;
 
-loader.classList.replace('loader', 'is-hidden');
-error.classList.add('is-hidden');
-divCatInfo.classList.add('is-hidden');
+refs.breedSelect.classList.add('hidden');
+refs.error.classList.add('hidden');
 
-let arrBreedsId = [];
 fetchBreeds()
-.then(data => {
-    data.forEach(element => {
-        arrBreedsId.push({text: element.name, value: element.id});
-    });
-    new SlimSelect({
-        select: selector,
-        data: arrBreedsId
-    });
+  .then(response => {
+    renderBreedSelector(response);
+    refs.loader.classList.add('hidden');
+  })
+  .catch(() => {
+    Notiflix.Notify.failure(refs.error.innerHTML);
+    refs.loader.classList.add('hidden');
+  });
+
+function renderBreedSelector(breedList) {
+  let breedOptions = breedList.map(({ id, name }) => {
+    return `
+            <option value="${id}">${name}</option>
+            `;
+  });
+  refs.breedSelect.innerHTML = breedOptions.join('');
+  refs.breedSelect.classList.remove('hidden');
+  new SlimSelect({
+    select: '.breed-select',
+  });
+}
+
+function renderCatInfo(cats) {
+  let catInfo = cats.map(({ breeds, url }) => {
+    return `
+        <div class="cat-info">
+        <img src="${url}" alt="${breeds[0].name}" width="400"/>
+        <div class="cat-info-text">
+        <h1 class="cat-title">${breeds[0].name}</h1>
+        <p>${breeds[0].description}</p>
+        <p><span class="temperament">Temperament:</span>
+        ${breeds[0].temperament}</p>
+        </div>
+        </div>
+          `;
+  });
+  refs.catInfo.innerHTML = catInfo.join('');
+  refs.catInfo.classList.remove('hidden');
+}
+
+refs.breedSelect.addEventListener('change', event => {
+  refs.error.classList.add('hidden');
+  refs.catInfo.classList.add('hidden');
+  refs.loader.classList.remove('hidden');
+  fetchCatByBreed(event.target.value)
+    .then(response => {
+      renderCatInfo(response);
     })
-.catch(onFetchError);
-
-selector.addEventListener('change', onSelectBreed);
-
-function onSelectBreed(event) {
-    loader.classList.replace('is-hidden', 'loader');
-    selector.classList.add('is-hidden');
-    divCatInfo.classList.add('is-hidden');
-
-    const breedId = event.currentTarget.value;
-    fetchCatByBreed(breedId)
-    .then(data => {
-        loader.classList.replace('loader', 'is-hidden');
-        selector.classList.remove('is-hidden');
-        const { url, breeds } = data[0];
-        
-        divCatInfo.innerHTML = `<div class="box-img"><img src="${url}" alt="${breeds[0].name}" width="400"/></div><div class="box"><h1>${breeds[0].name}</h1><p>${breeds[0].description}</p><p><b>Temperament:</b> ${breeds[0].temperament}</p></div>`
-        divCatInfo.classList.remove('is-hidden');
-    })
-    .catch(onFetchError);
-};
-
-function onFetchError(error) {
-    selector.classList.remove('is-hidden');
-    loader.classList.replace('loader', 'is-hidden');
-
-    Notify.failure('Oops! Something went wrong! Try reloading the page or select another cat breed!', {
-        position: 'center-center',
-        timeout: 5000,
-        width: '400px',
-        fontSize: '24px'
+    .catch(() => {
+      Notiflix.Notify.failure(refs.error.innerHTML);
+      refs.loader.classList.add('hidden');
+      refs.catInfo.classList.add('hidden');
     });
-};
-   
-
-
-
-
-
-
-    
+  refs.loader.classList.add('hidden');
+});

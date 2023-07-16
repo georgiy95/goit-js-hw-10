@@ -1,22 +1,36 @@
-const url = 'https://api.thecatapi.com/v1';
-const api_key = "live_i0tDaOGInqQ26rh7JUwZgUxN2ia9tgGfeQAmLlGg5e4sjZuijJKVoZO121TcrnQ9";
-
-export function fetchBreeds() {
-    return fetch(`${url}/breeds?api_key=${api_key}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(response.status);
-            }
-            return response.json();
-        });       
+const url = 'https://api.thecatapi.com/v1/breeds';
+const catInfoUrl = 'https://api.thecatapi.com/v1/images/search?breed_ids=';
+const options = {
+  headers: {
+    'x-api-key':
+      'live_rXvzCi1moeTLygU8rBTnVD6ehRR0Epach7KXn7cu0H6esWQ265Sjy8F8yms7E9n8',
+  },
 };
 
-export function fetchCatByBreed(breedId) {
-    return fetch(`${url}/images/search?api_key=${api_key}&breed_ids=${breedId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(response.status);
-            }
-            return response.json();
-        });  
-};
+function fetchBreeds() {
+  return fetch(url, options)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(response.status);
+      }
+      return response.json();
+    })
+    .catch(error => {
+      throw new Error(error);
+    });
+}
+
+function fetchCatByBreed(breedId) {
+  return fetch(catInfoUrl + breedId, options)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(response.status);
+      }
+      return response.json();
+    })
+    .catch(error => {
+      throw new Error(error);
+    });
+}
+
+export { fetchBreeds, fetchCatByBreed };
